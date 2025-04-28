@@ -1,8 +1,10 @@
 # Error Context Retrieval Proof of Concept
 
-This is a simple Python script demonstrating a proof of concept for retrieving relevant code context and similar historical execution steps (stack frames) based on a given error stack trace. It utilizes sentence embeddings for semantic similarity and Abstract Syntax Tree (AST) parsing for extracting structural features from code.
-
 This POC provides a foundational idea for how semantic search and structural code analysis can be combined to build more intelligent error analysis and debugging tools.
+
+This is a simple Python script demonstrating a proof of concept for retrieving relevant code context and similar historical execution steps (stack frames) based on a given error stack trace. 
+
+It utilizes sentence embeddings for semantic similarity and Abstract Syntax Tree (AST) parsing for extracting structural features from code.
 
 ## Features
 
