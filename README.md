@@ -6,31 +6,44 @@ This is a simple Python script demonstrating a proof of concept for retrieving r
 
 It utilizes sentence embeddings for semantic similarity and Abstract Syntax Tree (AST) parsing for extracting structural features from code.
 
+## Why Use AST Trees?
+
+While sentence embeddings are excellent at capturing the *semantic meaning* or *what* the code intends to do, they don't inherently understand the code's *structure* or *control flow*. An Abstract Syntax Tree (AST) provides a formal, programmatic representation of the code's syntactic structure.
+
+By parsing code into an AST, we can extract specific structural features like:
+* The presence of error handling (`try...except...finally`).
+* Decision points (`if`/`elif`/`else`).
+* Loops (`for`, `while`).
+* Function calls and definitions.
+* Variable assignments, etc.
+
+Combining semantic understanding (from embeddings) with structural understanding (from AST features) provides a richer context for error analysis. For instance, if an error trace involves an exception, retrieving code snippets that *semantically* match the context *and* are known to *structurally* contain `try/except` blocks (or lack them) can be particularly valuable for debugging. AST analysis allows us to find code relevant not just by *meaning*, but also by *how* it's built.
+
 ## Features
 
-* **Sentence Embeddings:** Uses the `sentence-transformers` library to generate vector embeddings for code snippets and stack trace frames to capture semantic meaning.
-* **AST Parsing:** Parses Python code snippets into Abstract Syntax Trees to extract structural features (e.g., presence of `try`/`except`, `if`, `for`/`while` loops, function calls).
+* **Sentence Embeddings:** Uses the `sentence-transformers` library to generate vector embeddings for code snippets and stack trace frames to capture semantic meaning (`what` the code does).
+* **AST Parsing:** Parses Python code snippets into Abstract Syntax Trees to extract **structural properties and control flow information** (`how` the code is built) (e.g., presence of `try`/`except`, `if`, `for`/`while` loops, function calls).
 * **Simulated Vector Database:** Stores code and stack frame data along with their embeddings and AST features in a simple in-memory list.
-* **Context Retrieval:** Given a new error stack trace, it embeds its frames and searches the simulated vector database for similar code snippets and historical stack frames based on cosine similarity.
-* **AST Feature Hinting:** Demonstrates how extracted AST features could potentially be used to highlight structural relevance (e.g., indicating if a retrieved code snippet contains error handling logic).
+* **Context Retrieval:** Given a new error stack trace, it embeds its frames and searches the simulated vector database for similar code snippets and historical stack frames based on cosine similarity. This leverages the **semantic** information.
+* **AST Feature Hinting:** Demonstrates how extracted AST features could potentially be used to highlight structural relevance (e.g., indicating if a retrieved code snippet contains error handling logic) **adding structural context to the semantically retrieved code**.
 
 ## How it Works
 
 1.  **Data Preparation:** Sample code snippets and simulated historical stack trace frames are defined.
-2.  **AST Analysis:** Each code snippet is parsed into an AST, and a predefined set of structural features is extracted.
+2.  **AST Analysis:** Each code snippet is parsed into an AST, and a predefined set of **structural features (like error handling constructs or control flow)** is extracted. These features provide insights into the code's architecture beyond just its natural language description.
 3.  **Embedding:** Sentence embeddings are generated for the content of both code snippets and stack trace frames using a pre-trained model (`all-MiniLM-L6-v2`).
 4.  **Storage:** The original content, metadata, embeddings, and AST features (for code) are stored in a simple in-memory list acting as a simulated vector database.
 5.  **Retrieval:** When a new error stack trace occurs:
     * Each frame of the new stack trace is embedded.
     * These frame embeddings are used to query the simulated vector database.
-    * Items (code or stack frames) in the database with embeddings similar (above a threshold) to the query frame embeddings are retrieved.
-    * The results are presented, including the similarity score and simple indicators based on AST features for code snippets.
-  
+    * Items (code or stack frames) in the database with embeddings similar (above a threshold) to the query frame embeddings are retrieved, primarily based on **semantic similarity**.
+    * The results are presented, including the similarity score and simple indicators based on AST features for code snippets, **providing additional structural context**.
+
 ## Proof of Concept Notes
 
 * The "vector database" is just an in-memory list. A real application would use a dedicated vector database (e.g., Chroma, Pinecone, Weaviate, Qdrant) for scalability and efficient searching.
-* The AST feature extraction is very basic. More sophisticated analysis could identify control flow, variable usage, dependencies, etc.
-* The use of AST features in retrieval is currently just for highlighting in the output. In a real system, AST features could be used for re-ranking search results, filtering, or providing structured input to a Large Language Model (LLM) for deeper analysis.
+* The AST feature extraction is very basic. More sophisticated analysis could identify control flow paths, variable usage, dependencies, cyclomatic complexity, etc.
+* The use of AST features in retrieval is currently just for highlighting in the output. In a real system, AST features could be used for re-ranking search results, filtering, or providing structured input to a Large Language Model (LLM) for deeper analysis of the error in the context of the code's structure.
 * The sample data is small and manually created. A real system would ingest code from a repository and potentially stack trace data from monitoring systems.
 * The similarity threshold (`SIMILARITY_THRESHOLD`) is a tunable parameter that affects retrieval strictness.
 
